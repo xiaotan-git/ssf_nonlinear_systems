@@ -1,5 +1,4 @@
-*.npz
 *.pdf
 __pycache__/
 data/
-plot*
+*.npz

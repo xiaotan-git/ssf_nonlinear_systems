@@ -9,6 +9,22 @@ from unicycle_nominal_controller import nominal_control, reference_path, saturat
 from unicycle_zocbf import ZOCBF
 from unicycle_model import UnicycleModel
 
+import argparse
+import sys
+
+# Create the parser
+parser = argparse.ArgumentParser(description="accepting command-line arguments.")
+
+# Add arguments
+parser.add_argument("--use_filter", type=bool, help="Use safety filter?",default=False)
+
+# Parse arguments
+args = parser.parse_args()
+
+# use safety filter? By default it is False.
+use_filter = args.use_filter
+# Does attack exist?
+exist_attack = True
 
 
 x0 = np.array([-10,0,-0.1])
@@ -57,9 +73,6 @@ print(x_next)
 
 # close the loop
 # sim with safety filter
-use_filter = True
-exist_attack = True
-
 state = x0
 states = [state]
 
@@ -93,13 +106,14 @@ for i in range(timesteps):
     x_ref = reference_path(time,reference_param)
 
     if exist_attack:
-        # print(f'\n timestep:{i},state:{state},fake_state:{fake_state}')
-        x_set = unicyle.get_plausible_state(i,np.array(act_controls),np.array(measurements))
-
-        # for testing naive approach
-        # x_set = measurement[[0,1,4]]
-        # x_set = np.array([state, fake_state])
-        # print(f'x_set:{x_set}')
+        if use_filter:
+            # print(f'\n timestep:{i},state:{state},fake_state:{fake_state}')
+            x_set = unicyle.get_plausible_state(i,np.array(act_controls),np.array(measurements))
+        else:
+            # for testing naive approach
+            # x_set = measurement[[0,1,4]]
+            x_set = np.array([state, fake_state])
+            # print(f'x_set:{x_set}')
 
         x_est = unicyle.get_average_state(x_set)
         if x_est.size != 3:
@@ -167,13 +181,13 @@ h_values = np.array(h_values)  # Shape (timesteps,)
 time_axis = np.linspace(0, timesteps * T, timesteps)  # Time vector
 
 
-# Define the header
-header = "xp yp theta v w"
+# # Define the header
+# header = "xp yp theta v w"
 
-# Save to a text file
-timestamp = datetime.datetime.now().strftime('%m%d_%H%M')
-data = np.hstack([states[:-1],act_controls])
-np.savetxt(f"data/x_p_y_p_theta_{timestamp}.txt", data, header=header, fmt="%.6f")
+# # Save to a text file
+# timestamp = datetime.datetime.now().strftime('%m%d_%H%M')
+# data = np.hstack([states[:-1],act_controls])
+# np.savetxt(f"data/x_p_y_p_theta_{timestamp}.txt", data, header=header, fmt="%.6f")
 
 
 
@@ -252,16 +266,9 @@ plt.legend()
 plt.grid()
 plt.show()
 
-# np.savez("data_SSF.npz", states=states, fake_states=fake_states, nom_controls=nom_controls,
-#          controls_filtered=controls_filtered, time_axis=time_axis,h_values=h_values)
 
-# # Load the saved arrays
-# loaded_data = np.load("data.npz")
-
-# # Access arrays
-# print("Array 1:\n", loaded_data["array1"])
-
+## saving the data
 # np.savez('data_nossf_states_a1_8b5',states = states, fake_states = fake_states,h = h_values,time_axis=time_axis)
 
 # np.savez('data_ssf_states_a1_8b5',states = states, fake_states = fake_states,h = h_values,time_axis=time_axis,
-#          reference_param = reference_param)
+#          nom_controls= nom_controls, controls_filtered = controls_filtered, reference_param = reference_param)
