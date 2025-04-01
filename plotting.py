@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.backends.backend_pdf import PdfPages
+import os
+
+dir_path = "figures"
+
+# Create the directory if it does not exist
+os.makedirs(dir_path, exist_ok=True)
 
 # Set global matplotlib parameters for consistent styling
 def set_figure_defaults():

@@ -220,6 +220,8 @@ if exist_attack:
     plt.plot(fake_states[:, 0], fake_states[:, 1], label='Fake Trajectory')
 
 ax = plt.gca()
+plt.ylim(-7,4)
+
 # Retrieve the automatically determined x and y limits
 x_limits = ax.get_xlim()
 y_limits = ax.get_ylim()
